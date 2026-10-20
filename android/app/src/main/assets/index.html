@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Aura Finance — Personal Wealth & Cash Flow Tracker</title>
+  
+  <!-- PWA & Mobile Web App Meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#020617">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Aura Finance">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icon-192.png">
+
+  <!-- Offline Fallback Styles (Zero Internet Required) -->
+  <link rel="stylesheet" href="offline_styles.css">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            credit: {
+              light: '#34d399',
+              DEFAULT: '#10b981',
+              dark: '#059669',
+              bg: 'rgba(16, 185, 129, 0.12)'
+            },
+            debit: {
+              light: '#fb7185',
+              DEFAULT: '#f43f5e',
+              dark: '#e11d48',
+              bg: 'rgba(244, 63, 94, 0.12)'
+            },
+            balance: {
+              light: '#818cf8',
+              DEFAULT: '#6366f1',
+              dark: '#4f46e5',
+              bg: 'rgba(99, 102, 241, 0.12)'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-feature-settings: 'tnum' on, 'lnum' on;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.3);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.2);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.35);
+    }
+
+    .chart-bar-group {
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .chart-bar-group:hover {
+      filter: brightness(1.18);
+    }
+
+    .pulse-dot {
+      animation: pulseAnim 2s infinite;
+    }
+    @keyframes pulseAnim {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.9); }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 lg:px-8 py-3.5">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- Brand & Status -->
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-emerald-400 p-0.5 shadow-lg shadow-indigo-500/20 flex items-center justify-center">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+            <svg class="w-5 h-5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-base tracking-tight text-white">Aura</span>
+            <span class="text-xs uppercase tracking-wider px-1.5 py-0.5 rounded font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Finance</span>
+          </div>
+          <p class="text-[12px] text-slate-400 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot inline-block"></span>
+            Live Portfolio Analytics
+          </p>
+        </div>
+      </div>
+
+      <!-- Center Period Selector -->
+      <div class="hidden md:flex items-center bg-slate-900/90 border border-slate-800 rounded-xl p-1 text-xs">
+        <button onclick="setGlobalTimeframe('6M')" id="btn-tf-6M" class="px-3.5 py-1.5 rounded-lg font-medium transition-all bg-indigo-600 text-white shadow-sm">6 Months</button>
+        <button onclick="setGlobalTimeframe('1Y')" id="btn-tf-1Y" class="px-3.5 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white">1 Year</button>
+        <button onclick="setGlobalTimeframe('8W')" id="btn-tf-8W" class="px-3.5 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white">8 Weeks</button>
+      </div>
+
+      <!-- Right Controls & Actions -->
+      <div class="flex items-center gap-2.5">
+        <!-- Install App Button (PWA) -->
+        <button onclick="handleInstallClick()" id="btn-install-app" class="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-xs font-medium transition-all" title="Install as Mobile App">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+          </svg>
+          <span class="hidden lg:inline">Install App</span>
+        </button>
+
+        <!-- Quick Currency Toggle -->
+        <div class="relative">
+          <select id="currency-select" onchange="changeCurrency(this.value)" class="bg-slate-900 border border-slate-800 text-slate-300 text-xs rounded-xl px-2.5 py-2 font-mono-num focus:outline-none focus:border-indigo-500 cursor-pointer">
+            <option value="USD" selected>USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="INR">INR (₹)</option>
+          </select>
+        </div>
+
+        <!-- Offline SMS Scanner Button -->
+        <button onclick="openSmsModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-semibold transition-all" title="Offline SMS Reader">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span class="hidden md:inline">SMS Scanner</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        </button>
+
+        <!-- Add Transaction Button -->
+        <button onclick="openModal()" class="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/40 transition-all active:scale-95">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span class="hidden sm:inline">Add Transaction</span>
+          <span class="sm:hidden">Add</span>
+        </button>
+
+        <!-- Light/Dark Toggle -->
+        <button onclick="toggleTheme()" class="p-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-900 transition-colors" title="Toggle Theme">
+          <svg id="theme-icon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- KPI Summary Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- Card 1: Total Balance -->
+      <div class="relative overflow-hidden bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5 hover:border-slate-700/80 transition-all group shadow-sm">
+        <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all pointer-events-none"></div>
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-medium uppercase tracking-wider">Total Balance</span>
+          <div class="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+              <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+              <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <h2 id="kpi-balance" class="text-2xl sm:text-3xl font-extrabold text-white font-mono-num tracking-tight">$42,850.50</h2>
+        </div>
+        <div class="mt-3 flex items-center gap-2 text-xs">
+          <span class="inline-flex items-center text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-md">
+            <svg class="w-3.5 h-3.5 mr-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
+            +8.4%
+          </span>
+          <span class="text-slate-400">vs last month</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Total Credit (Income) -->
+      <div class="relative overflow-hidden bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5 hover:border-emerald-500/30 transition-all group shadow-sm">
+        <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all pointer-events-none"></div>
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-medium uppercase tracking-wider">Credit (Inflow)</span>
+          <div class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="19" x2="12" y2="5"></line>
+              <polyline points="5 12 12 5 19 12"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <h2 id="kpi-credit" class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono-num tracking-tight">+$9,420.00</h2>
+        </div>
+        <div class="mt-3 flex items-center gap-2 text-xs">
+          <span class="inline-flex items-center text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-md">
+            <svg class="w-3.5 h-3.5 mr-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
+            +12.3%
+          </span>
+          <span class="text-slate-400">3 deposits this period</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Total Debit (Expenses) -->
+      <div class="relative overflow-hidden bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5 hover:border-rose-500/30 transition-all group shadow-sm">
+        <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/20 transition-all pointer-events-none"></div>
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-medium uppercase tracking-wider">Debit (Outflow)</span>
+          <div class="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <polyline points="19 12 12 19 5 12"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <h2 id="kpi-debit" class="text-2xl sm:text-3xl font-extrabold text-rose-400 font-mono-num tracking-tight">-$4,150.00</h2>
+        </div>
+        <div class="mt-3 flex items-center gap-2 text-xs">
+          <span class="inline-flex items-center text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-md">
+            <svg class="w-3.5 h-3.5 mr-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            -4.2%
+          </span>
+          <span class="text-slate-400">Under monthly budget</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Net Cash Flow / Savings Rate -->
+      <div class="relative overflow-hidden bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5 hover:border-slate-700/80 transition-all group shadow-sm">
+        <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all pointer-events-none"></div>
+        <div class="flex items-center justify-between text-slate-400 mb-2">
+          <span class="text-xs font-medium uppercase tracking-wider">Net Savings Rate</span>
+          <div class="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <h2 id="kpi-rate" class="text-2xl sm:text-3xl font-extrabold text-white font-mono-num tracking-tight">55.9%</h2>
+          <span id="kpi-net" class="text-xs font-mono-num text-emerald-400 font-medium">(+$5,270.00)</span>
+        </div>
+        <div class="mt-3">
+          <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <div id="kpi-progress" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-1.5 rounded-full transition-all duration-700" style="width: 55.9%"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PROMINENT BAR GRAPH HERO SECTION -->
+    <section class="bg-slate-900/70 border border-slate-800/90 rounded-2xl p-5 sm:p-6 shadow-xl relative backdrop-blur-sm">
+      
+      <!-- Graph Header & Interactive Controls -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-800/80">
+        <div>
+          <div class="flex items-center gap-2.5">
+            <h3 class="text-lg font-bold text-white tracking-tight">Cash Flow & Total Balance Trends</h3>
+            <span class="text-[12px] bg-slate-800 text-slate-300 font-medium px-2 py-0.5 rounded-md border border-slate-700/60">
+              Interactive Multi-Series
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">
+            Visual comparison of incoming credits, debited expenses, and net cumulative wealth progression.
+          </p>
+        </div>
+
+        <!-- Legend & Visibility Toggles -->
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+          <!-- Credit Legend Toggle -->
+          <button onclick="toggleSeries('credit')" id="legend-credit" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-medium hover:bg-emerald-500/20 transition-all select-none">
+            <span class="w-2.5 h-2.5 rounded-sm bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
+            <span>Credit (Inflow)</span>
+          </button>
+
+          <!-- Debit Legend Toggle -->
+          <button onclick="toggleSeries('debit')" id="legend-debit" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-400 text-xs font-medium hover:bg-rose-500/20 transition-all select-none">
+            <span class="w-2.5 h-2.5 rounded-sm bg-rose-500 shadow-sm shadow-rose-500/50"></span>
+            <span>Debit (Outflow)</span>
+          </button>
+
+          <!-- Balance Legend Toggle -->
+          <button onclick="toggleSeries('balance')" id="legend-balance" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 text-xs font-medium hover:bg-indigo-500/20 transition-all select-none">
+            <span class="w-2.5 h-2.5 rounded-sm bg-indigo-500 shadow-sm shadow-indigo-500/50"></span>
+            <span>Total Balance</span>
+          </button>
+
+          <!-- Trend Spline Toggle -->
+          <button onclick="toggleSeries('trend')" id="legend-trend" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-300 text-xs font-medium hover:bg-amber-500/20 transition-all select-none">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 18l6-6 4 4 8-8"></path></svg>
+            <span>Trend Line</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Summary Bar Metrics -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 py-3 border-b border-slate-800/60 my-3 text-xs">
+        <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-950/40 border border-slate-800/40">
+          <span class="text-slate-400">Avg Monthly Inflow:</span>
+          <span id="stat-avg-credit" class="font-semibold text-emerald-400 font-mono-num">$8,630</span>
+        </div>
+        <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-950/40 border border-slate-800/40">
+          <span class="text-slate-400">Avg Monthly Outflow:</span>
+          <span id="stat-avg-debit" class="font-semibold text-rose-400 font-mono-num">$4,020</span>
+        </div>
+        <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-950/40 border border-slate-800/40">
+          <span class="text-slate-400">Net Surplus Avg:</span>
+          <span id="stat-avg-net" class="font-semibold text-indigo-300 font-mono-num">+$4,610</span>
+        </div>
+        <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-950/40 border border-slate-800/40">
+          <span class="text-slate-400">Capital Growth:</span>
+          <span id="stat-growth" class="font-semibold text-emerald-400 font-mono-num">+32.6% YTD</span>
+        </div>
+      </div>
+
+      <!-- Responsive SVG Chart Container -->
+      <div class="relative w-full h-[360px] sm:h-[400px] mt-2 select-none" id="chart-wrapper">
+        <svg id="finance-svg-chart" class="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 1000 400">
+          <defs>
+            <!-- Credit Gradient -->
+            <linearGradient id="creditGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#10b981" stop-opacity="0.95"/>
+              <stop offset="100%" stop-color="#059669" stop-opacity="0.75"/>
+            </linearGradient>
+            <!-- Debit Gradient -->
+            <linearGradient id="debitGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.95"/>
+              <stop offset="100%" stop-color="#be123c" stop-opacity="0.75"/>
+            </linearGradient>
+            <!-- Balance Gradient -->
+            <linearGradient id="balanceGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#818cf8" stop-opacity="0.95"/>
+              <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.75"/>
+            </linearGradient>
+            <!-- Trend Line Glow Filter -->
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+          </defs>
+
+          <!-- SVG content injected dynamically -->
+          <g id="chart-grid"></g>
+          <g id="chart-bars"></g>
+          <g id="chart-trend-line"></g>
+          <g id="chart-labels"></g>
+        </svg>
+
+        <!-- Floating Interactive Tooltip -->
+        <div id="chart-tooltip" class="absolute pointer-events-none opacity-0 transition-opacity duration-150 z-30 bg-slate-900/95 border border-slate-700/80 rounded-xl p-3.5 shadow-2xl backdrop-blur-md min-w-[210px] transform -translate-x-1/2 -translate-y-full mb-3 text-xs">
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
+            <span id="tooltip-month" class="font-bold text-white text-sm">October 2026</span>
+            <span id="tooltip-variance" class="px-1.5 py-0.5 rounded text-[11px] font-mono-num font-semibold bg-emerald-500/10 text-emerald-400">+12%</span>
+          </div>
+          <div class="space-y-1.5 font-mono-num">
+            <div class="flex items-center justify-between">
+              <span class="text-slate-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Credit:
+              </span>
+              <span id="tooltip-credit" class="font-bold text-emerald-400">+$9,420.00</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span> Debit:
+              </span>
+              <span id="tooltip-debit" class="font-bold text-rose-400">-$4,150.00</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-indigo-400"></span> Net Surplus:
+              </span>
+              <span id="tooltip-net" class="font-bold text-indigo-300">+$5,270.00</span>
+            </div>
+            <div class="flex items-center justify-between pt-1 border-t border-slate-800">
+              <span class="text-slate-400 font-sans">Total Balance:</span>
+              <span id="tooltip-balance" class="font-bold text-white">$42,850.50</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Footer Information & Axis Labels -->
+      <div class="mt-4 pt-3 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span>Hover over any monthly column to inspect comprehensive cash flow, burn rate, and asset valuation.</span>
+        </div>
+        <div class="flex items-center gap-3 font-mono-num text-[12px]">
+          <span>Dual Axis: Left (In/Outflow) · Right (Cumulative Balance)</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Lower Section: Analytics & Recent Transactions Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left Column (2 Cols): Searchable Transaction Feed -->
+      <section class="lg:col-span-2 bg-slate-900/70 border border-slate-800/90 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+        
+        <!-- Transaction Header & Filters -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">Recent Financial Activity</h3>
+            <p class="text-xs text-slate-400">Real-time ledger of debits, salary deposits, and investment payouts</p>
+          </div>
+
+          <!-- Filter Pills -->
+          <div class="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+            <button onclick="filterTransactions('ALL')" id="filter-all" class="px-3 py-1 rounded-lg font-medium bg-slate-800 text-white transition-all">All</button>
+            <button onclick="filterTransactions('CREDIT')" id="filter-credit" class="px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-emerald-400 transition-all">Credit</button>
+            <button onclick="filterTransactions('DEBIT')" id="filter-debit" class="px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-rose-400 transition-all">Debit</button>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative">
+          <input 
+            type="text" 
+            id="tx-search-input" 
+            oninput="handleSearch(this.value)"
+            placeholder="Search merchant, category, or description..." 
+            class="w-full bg-slate-950/80 border border-slate-800/90 text-slate-200 text-xs rounded-xl pl-9 pr-4 py-2.5 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all"
+          >
+          <svg class="w-4 h-4 text-slate-500 absolute left-3 top-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+
+        <!-- Transaction List -->
+        <div id="transaction-list" class="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
+          <!-- Dynamic transaction cards rendered via JS -->
+        </div>
+
+        <!-- Summary & Counter -->
+        <div class="pt-2 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/60">
+          <span id="tx-count">Showing 6 entries</span>
+          <button onclick="exportData()" class="hover:text-white transition-colors flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Export CSV
+          </button>
+        </div>
+
+      </section>
+
+      <!-- Right Column (1 Col): Breakdown & Budgets -->
+      <div class="space-y-6">
+
+        <!-- Category Spend Breakdown -->
+        <section class="bg-slate-900/70 border border-slate-800/90 rounded-2xl p-5 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <h4 class="text-sm font-bold text-white tracking-tight">Spending Allocation</h4>
+              <p class="text-xs text-slate-400">Current cycle by category</p>
+            </div>
+            <span class="text-xs font-mono-num font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">$4,150.00</span>
+          </div>
+
+          <div id="category-bars" class="space-y-3.5 text-xs">
+            <!-- Dynamic Category Breakdown -->
+          </div>
+        </section>
+
+        <!-- Budget & Milestone Targets -->
+        <section class="bg-slate-900/70 border border-slate-800/90 rounded-2xl p-5 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h4 class="text-sm font-bold text-white tracking-tight">Financial Milestones</h4>
+            <span class="text-xs text-indigo-400 font-medium">Q4 Target</span>
+          </div>
+
+          <div class="space-y-4 text-xs">
+            <!-- Goal 1 -->
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-slate-300">
+                <span class="font-medium flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Emergency Buffer
+                </span>
+                <span class="font-mono-num font-semibold text-slate-200">$28,500 / $35,000</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2 rounded-full" style="width: 81.4%"></div>
+              </div>
+              <div class="flex justify-between text-[11px] text-slate-400">
+                <span>81.4% funded</span>
+                <span>$6,500 remaining</span>
+              </div>
+            </div>
+
+            <!-- Goal 2 -->
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-slate-300">
+                <span class="font-medium flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-indigo-400"></span> Index Investment Fund
+                </span>
+                <span class="font-mono-num font-semibold text-slate-200">$18,200 / $20,000</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                <div class="bg-gradient-to-r from-indigo-500 to-cyan-400 h-2 rounded-full" style="width: 91%"></div>
+              </div>
+              <div class="flex justify-between text-[11px] text-slate-400">
+                <span>91.0% funded</span>
+                <span>$1,800 remaining</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Offline SMS Reader & Parser Modal -->
+  <div id="sms-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4 transform scale-95 transition-transform duration-200" id="sms-modal-card">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base font-bold text-white">Offline Bank SMS Scanner</h3>
+              <span class="text-[10px] px-1.5 py-0.2 rounded font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">100% On-Device</span>
+            </div>
+            <p class="text-xs text-slate-400">Extracts transaction amount, merchant, and type locally with zero internet.</p>
+          </div>
+        </div>
+        <button onclick="closeSmsModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Environment Status Banner -->
+      <div id="sms-env-banner" class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs text-slate-300">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="sms-env-status">Local Regex Engine Ready</span>
+        </div>
+        <button onclick="triggerAndroidScan()" id="btn-native-scan" class="text-indigo-400 hover:text-indigo-300 text-xs font-medium underline hidden">Scan Inbox</button>
+      </div>
+
+      <!-- Quick Test Samples -->
+      <div>
+        <label class="block text-slate-400 text-xs font-medium mb-1.5">Click to test real bank SMS formats:</label>
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" onclick="loadSampleSms(0)" class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 text-xs transition-colors">HDFC Bank Debit</button>
+          <button type="button" onclick="loadSampleSms(1)" class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 text-xs transition-colors">SBI UPI (Swiggy)</button>
+          <button type="button" onclick="loadSampleSms(2)" class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 text-xs transition-colors">ICICI Salary Credit</button>
+          <button type="button" onclick="loadSampleSms(3)" class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 text-xs transition-colors">Google Pay (Starbucks)</button>
+          <button type="button" onclick="loadSampleSms(4)" class="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 text-xs transition-colors">Chase Card ($)</button>
+        </div>
+      </div>
+
+      <!-- SMS Input Textarea -->
+      <div class="space-y-1.5 text-xs">
+        <label class="block text-slate-300 font-medium">Bank SMS Content</label>
+        <textarea id="sms-input-text" rows="3" placeholder="Paste or type any bank or payment SMS text here..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 placeholder-slate-500 font-mono-num text-xs focus:outline-none focus:border-emerald-500 transition-all"></textarea>
+      </div>
+
+      <!-- Live Parse Preview Card -->
+      <div id="sms-preview-card" class="p-3 rounded-xl bg-slate-950 border border-slate-800 hidden space-y-2 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-400">Parsed Breakdown:</span>
+          <span id="preview-type-badge" class="px-2 py-0.5 rounded font-semibold text-xs">DEBIT</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono-num text-xs">
+          <div>
+            <span class="text-slate-500 block text-[11px]">Amount</span>
+            <span id="preview-amount" class="font-bold text-white text-sm">--</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block text-[11px]">Merchant</span>
+            <span id="preview-merchant" class="font-semibold text-slate-200 truncate block">--</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block text-[11px]">Category</span>
+            <span id="preview-category" class="font-medium text-slate-300 truncate block">--</span>
+          </div>
+          <div>
+            <span class="text-slate-500 block text-[11px]">A/c Tail</span>
+            <span id="preview-account" class="font-medium text-slate-400">--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pt-2 flex justify-end gap-2.5 text-xs">
+        <button type="button" onclick="closeSmsModal()" class="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white transition-colors">Cancel</button>
+        <button type="button" onclick="executeSmsParse()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition-all">Parse Test</button>
+        <button type="button" onclick="confirmAndAddSms()" id="btn-add-sms" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-lg shadow-emerald-600/30 transition-all disabled:opacity-50" disabled>Add to Ledger & Graph</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Install on Phone Guidance Modal -->
+  <div id="install-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4 transform scale-95 transition-transform duration-200" id="install-modal-card">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+              <line x1="12" y1="18" x2="12.01" y2="18"></line>
+            </svg>
+          </div>
+          <h3 class="text-base font-bold text-white">Install on Your Phone</h3>
+        </div>
+        <button onclick="closeInstallModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs text-slate-300">
+        <p>Aura Finance is a <strong>Progressive Web App (PWA)</strong>. It can be installed directly to your phone's home screen with full offline support and no app store needed!</p>
+        
+        <!-- iPhone / Safari -->
+        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+          <div class="flex items-center gap-2 font-semibold text-white">
+            <span class="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-[11px]"></span>
+            <span>iPhone / iPad (Safari)</span>
+          </div>
+          <ol class="list-decimal list-inside space-y-1 text-slate-400 pl-1">
+            <li>Open this URL in <strong>Safari</strong> on your iPhone.</li>
+            <li>Tap the <strong>Share</strong> icon (square with arrow up <span class="text-indigo-400">⎋</span>).</li>
+            <li>Scroll down and tap <strong>"Add to Home Screen"</strong> (⊞).</li>
+            <li>Tap <strong>Add</strong>. The Aura Finance icon appears on your home screen!</li>
+          </ol>
+        </div>
+
+        <!-- Android / Chrome -->
+        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+          <div class="flex items-center gap-2 font-semibold text-white">
+            <span class="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[11px]">▶</span>
+            <span>Android (Chrome / Edge)</span>
+          </div>
+          <ol class="list-decimal list-inside space-y-1 text-slate-400 pl-1">
+            <li>Open this URL in <strong>Chrome</strong>.</li>
+            <li>Tap the <strong>Three dots (⋮)</strong> menu in the upper right.</li>
+            <li>Select <strong>"Install App"</strong> or <strong>"Add to Home screen"</strong>.</li>
+            <li>Confirm, and the app launches as an independent fullscreen app!</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <button type="button" onclick="closeInstallModal()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-md transition-all">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Transaction Modal -->
+  <div id="tx-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4 transform scale-95 transition-transform duration-200" id="modal-card">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </div>
+          <h3 class="text-base font-bold text-white">Record New Transaction</h3>
+        </div>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="tx-form" onsubmit="handleFormSubmit(event)" class="space-y-4 text-xs">
+        
+        <!-- Type Selection: Credit vs Debit -->
+        <div>
+          <label class="block text-slate-300 font-medium mb-1.5">Transaction Type</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer text-slate-300 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/10 has-[:checked]:text-emerald-400 transition-all">
+              <input type="radio" name="txType" value="credit" class="hidden" checked>
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+              <span class="font-semibold">Credit (Income)</span>
+            </label>
+            <label class="flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer text-slate-300 has-[:checked]:border-rose-500 has-[:checked]:bg-rose-500/10 has-[:checked]:text-rose-400 transition-all">
+              <input type="radio" name="txType" value="debit" class="hidden">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              <span class="font-semibold">Debit (Expense)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Description / Merchant -->
+        <div>
+          <label class="block text-slate-300 font-medium mb-1">Title / Merchant</label>
+          <input type="text" id="tx-title" required placeholder="e.g. Design Consulting or Whole Foods" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <!-- Amount & Currency -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 font-medium mb-1">Amount ($)</label>
+            <input type="number" step="0.01" min="0.01" id="tx-amount" required placeholder="250.00" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 placeholder-slate-500 font-mono-num focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-slate-300 font-medium mb-1">Category</label>
+            <select id="tx-category" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500">
+              <option value="Salary & Wages">Salary & Wages</option>
+              <option value="Freelance & Consulting">Freelance & Consulting</option>
+              <option value="Investment & Dividends">Investment & Dividends</option>
+              <option value="Housing & Rent">Housing & Rent</option>
+              <option value="Groceries & Food">Groceries & Food</option>
+              <option value="Tech & Subscriptions">Tech & Subscriptions</option>
+              <option value="Transportation">Transportation</option>
+              <option value="Utilities & Bills">Utilities & Bills</option>
+              <option value="Leisure & Travel">Leisure & Travel</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Date -->
+        <div>
+          <label class="block text-slate-300 font-medium mb-1">Date</label>
+          <input type="date" id="tx-date" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2.5">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white transition-colors">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg shadow-indigo-600/30 transition-all">Save Transaction</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 pointer-events-none transform translate-y-12 opacity-0 transition-all duration-300 bg-slate-900 border border-slate-700/80 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5">
+    <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+    <span id="toast-msg">Transaction recorded successfully!</span>
+  </div>
+
+  <!-- Core JavaScript Logic -->
+  <script>
+    // State management
+    const state = {
+      currency: 'USD',
+      symbol: '$',
+      rate: 1.0,
+      timeframe: '6M',
+      filterType: 'ALL',
+      searchQuery: '',
+      visibleSeries: {
+        credit: true,
+        debit: true,
+        balance: true,
+        trend: true
+      },
+      // Monthly aggregate data
+      monthlyData: [
+        { month: 'May', fullDate: 'May 2026', credit: 7800, debit: 3950, balance: 31200 },
+        { month: 'Jun', fullDate: 'June 2026', credit: 8100, debit: 4120, balance: 35180 },
+        { month: 'Jul', fullDate: 'July 2026', credit: 7950, debit: 4400, balance: 38730 },
+        { month: 'Aug', fullDate: 'August 2026', credit: 9200, debit: 3800, balance: 44130 },
+        { month: 'Sep', fullDate: 'September 2026', credit: 8650, debit: 4250, balance: 48530 },
+        { month: 'Oct', fullDate: 'October 2026', credit: 9420, debit: 4150, balance: 53800 }
+      ],
+      // Alternative timeframes
+      yearlyData: [
+        { month: 'Nov 25', fullDate: 'November 2025', credit: 6900, debit: 3700, balance: 22000 },
+        { month: 'Dec 25', fullDate: 'December 2025', credit: 8500, debit: 4800, balance: 25700 },
+        { month: 'Jan 26', fullDate: 'January 2026', credit: 7200, debit: 3600, balance: 29300 },
+        { month: 'Feb 26', fullDate: 'February 2026', credit: 7400, debit: 3750, balance: 32950 },
+        { month: 'Mar 26', fullDate: 'March 2026', credit: 8300, debit: 4200, balance: 37050 },
+        { month: 'Apr 26', fullDate: 'April 2026', credit: 7600, debit: 3850, balance: 40800 },
+        { month: 'May 26', fullDate: 'May 2026', credit: 7800, debit: 3950, balance: 44650 },
+        { month: 'Jun 26', fullDate: 'June 2026', credit: 8100, debit: 4120, balance: 48630 },
+        { month: 'Jul 26', fullDate: 'July 2026', credit: 7950, debit: 4400, balance: 52180 },
+        { month: 'Aug 26', fullDate: 'August 2026', credit: 9200, debit: 3800, balance: 57580 },
+        { month: 'Sep 26', fullDate: 'September 2026', credit: 8650, debit: 4250, balance: 61980 },
+        { month: 'Oct 26', fullDate: 'October 2026', credit: 9420, debit: 4150, balance: 67250 }
+      ],
+      weeklyData: [
+        { month: 'Wk 35', fullDate: 'Week 35 (Sep)', credit: 1950, debit: 820, balance: 44100 },
+        { month: 'Wk 36', fullDate: 'Week 36 (Sep)', credit: 2400, debit: 1100, balance: 45400 },
+        { month: 'Wk 37', fullDate: 'Week 37 (Sep)', credit: 2100, debit: 950, balance: 46550 },
+        { month: 'Wk 38', fullDate: 'Week 38 (Sep)', credit: 2200, debit: 1380, balance: 47370 },
+        { month: 'Wk 39', fullDate: 'Week 39 (Oct)', credit: 2850, debit: 1050, balance: 49170 },
+        { month: 'Wk 40', fullDate: 'Week 40 (Oct)', credit: 1980, debit: 890, balance: 50260 },
+        { month: 'Wk 41', fullDate: 'Week 41 (Oct)', credit: 2150, debit: 1120, balance: 51290 },
+        { month: 'Wk 42', fullDate: 'Week 42 (Oct)', credit: 2440, debit: 1090, balance: 52640 }
+      ],
+      // Transactions log
+      transactions: [
+        { id: 'tx-1', title: 'Stripe Payout · SaaS Revenue', type: 'credit', amount: 5600.00, category: 'Salary & Wages', date: '2026-10-18', icon: 'zap' },
+        { id: 'tx-2', title: 'Equinox Health & Gym', type: 'debit', amount: 280.00, category: 'Leisure & Travel', date: '2026-10-17', icon: 'heart' },
+        { id: 'tx-3', title: 'Vanguard Dividend Distribution', type: 'credit', amount: 920.00, category: 'Investment & Dividends', date: '2026-10-15', icon: 'trending-up' },
+        { id: 'tx-4', title: 'AWS Cloud Services Hosting', type: 'debit', amount: 450.00, category: 'Tech & Subscriptions', date: '2026-10-14', icon: 'cpu' },
+        { id: 'tx-5', title: 'Luxury Apt Lease Payment', type: 'debit', amount: 1800.00, category: 'Housing & Rent', date: '2026-10-12', icon: 'home' },
+        { id: 'tx-6', title: 'Whole Foods Market organic', type: 'debit', amount: 340.50, category: 'Groceries & Food', date: '2026-10-10', icon: 'shopping-cart' },
+        { id: 'tx-7', title: 'Design System Client Retainer', type: 'credit', amount: 2900.00, category: 'Freelance & Consulting', date: '2026-10-08', icon: 'briefcase' }
+      ]
+    };
+
+    // Category breakdown baseline
+    const categoryConfig = [
+      { name: 'Housing & Rent', amount: 1800, color: 'bg-indigo-500' },
+      { name: 'Groceries & Food', amount: 740, color: 'bg-emerald-500' },
+      { name: 'Tech & Subscriptions', amount: 450, color: 'bg-cyan-500' },
+      { name: 'Transportation', amount: 380, color: 'bg-amber-500' },
+      { name: 'Utilities & Bills', amount: 320, color: 'bg-purple-500' },
+      { name: 'Leisure & Travel', amount: 460, color: 'bg-rose-500' }
+    ];
+
+    // Currency Formatting
+    function formatMoney(amount) {
+      const converted = amount * state.rate;
+      return state.symbol + converted.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function formatShortMoney(amount) {
+      const converted = amount * state.rate;
+      if (converted >= 1000) {
+        return state.symbol + (converted / 1000).toFixed(1) + 'k';
+      }
+      return state.symbol + Math.round(converted);
+    }
+
+    function changeCurrency(curr) {
+      state.currency = curr;
+      if (curr === 'USD') { state.symbol = '$'; state.rate = 1.0; }
+      else if (curr === 'EUR') { state.symbol = '€'; state.rate = 0.92; }
+      else if (curr === 'GBP') { state.symbol = '£'; state.rate = 0.79; }
+      else if (curr === 'INR') { state.symbol = '₹'; state.rate = 83.5; }
+      updateDashboard();
+    }
+
+    // Timeframe switcher
+    function setGlobalTimeframe(tf) {
+      state.timeframe = tf;
+      ['6M', '1Y', '8W'].forEach(t => {
+        const btn = document.getElementById('btn-tf-' + t);
+        if (t === tf) {
+          btn.className = "px-3.5 py-1.5 rounded-lg font-medium transition-all bg-indigo-600 text-white shadow-sm";
+        } else {
+          btn.className = "px-3.5 py-1.5 rounded-lg font-medium transition-all text-slate-400 hover:text-white";
+        }
+      });
+      renderChart();
+    }
+
+    // Toggle legend series
+    function toggleSeries(seriesKey) {
+      state.visibleSeries[seriesKey] = !state.visibleSeries[seriesKey];
+      const btn = document.getElementById('legend-' + seriesKey);
+      
+      const activeClasses = {
+        credit: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
+        debit: 'border-rose-500/30 bg-rose-500/10 text-rose-400',
+        balance: 'border-indigo-500/30 bg-indigo-500/10 text-indigo-400',
+        trend: 'border-amber-500/30 bg-amber-500/10 text-amber-300'
+      };
+
+      if (state.visibleSeries[seriesKey]) {
+        btn.className = `flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all select-none ${activeClasses[seriesKey]}`;
+      } else {
+        btn.className = "flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-900/40 text-slate-500 text-xs font-medium transition-all select-none line-through opacity-60";
+      }
+      renderChart();
+    }
+
+    // Get current dataset
+    function getCurrentData() {
+      if (state.timeframe === '1Y') return state.yearlyData;
+      if (state.timeframe === '8W') return state.weeklyData;
+      return state.monthlyData;
+    }
+
+    // Render the SVG Bar Chart
+    function renderChart() {
+      const data = getCurrentData();
+      const gridEl = document.getElementById('chart-grid');
+      const barsEl = document.getElementById('chart-bars');
+      const trendEl = document.getElementById('chart-trend-line');
+      const labelsEl = document.getElementById('chart-labels');
+
+      gridEl.innerHTML = '';
+      barsEl.innerHTML = '';
+      trendEl.innerHTML = '';
+      labelsEl.innerHTML = '';
+
+      const svgWidth = 1000;
+      const svgHeight = 400;
+      const padLeft = 70;
+      const padRight = 70;
+      const padTop = 30;
+      const padBottom = 45;
+
+      const chartW = svgWidth - padLeft - padRight;
+      const chartH = svgHeight - padTop - padBottom;
+
+      // Find max amounts for scaling
+      let maxFlow = 0;
+      let maxBalance = 0;
+
+      data.forEach(d => {
+        if (d.credit > maxFlow) maxFlow = d.credit;
+        if (d.debit > maxFlow) maxFlow = d.debit;
+        if (d.balance > maxBalance) maxBalance = d.balance;
+      });
+
+      // Round ceilings
+      maxFlow = Math.ceil((maxFlow * 1.15) / 1000) * 1000;
+      maxBalance = Math.ceil((maxBalance * 1.1) / 10000) * 10000;
+
+      // Draw horizontal grid lines (5 levels)
+      const steps = 5;
+      for (let i = 0; i <= steps; i++) {
+        const y = padTop + (chartH / steps) * (steps - i);
+        const flowVal = (maxFlow / steps) * i;
+        const balVal = (maxBalance / steps) * i;
+
+        // Line
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', padLeft);
+        line.setAttribute('y1', y);
+        line.setAttribute('x2', svgWidth - padRight);
+        line.setAttribute('y2', y);
+        line.setAttribute('stroke', '#334155');
+        line.setAttribute('stroke-width', i === 0 ? '1.5' : '1');
+        line.setAttribute('stroke-dasharray', i === 0 ? 'none' : '4,4');
+        line.setAttribute('stroke-opacity', i === 0 ? '0.7' : '0.4');
+        gridEl.appendChild(line);
+
+        // Left axis label (Flow: Credit/Debit)
+        const textL = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        textL.setAttribute('x', padLeft - 12);
+        textL.setAttribute('y', y + 4);
+        textL.setAttribute('text-anchor', 'end');
+        textL.setAttribute('fill', '#94a3b8');
+        textL.setAttribute('font-size', '11');
+        textL.setAttribute('font-family', 'JetBrains Mono, monospace');
+        textL.textContent = formatShortMoney(flowVal);
+        labelsEl.appendChild(textL);
+
+        // Right axis label (Balance)
+        if (state.visibleSeries.balance) {
+          const textR = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          textR.setAttribute('x', svgWidth - padRight + 12);
+          textR.setAttribute('y', y + 4);
+          textR.setAttribute('text-anchor', 'start');
+          textR.setAttribute('fill', '#818cf8');
+          textR.setAttribute('font-size', '11');
+          textR.setAttribute('font-family', 'JetBrains Mono, monospace');
+          textR.textContent = formatShortMoney(balVal);
+          labelsEl.appendChild(textR);
+        }
+      }
+
+      // Group geometry calculation
+      const numGroups = data.length;
+      const groupWidth = chartW / numGroups;
+      
+      // Determine how many bars are visible
+      const activeBarKeys = [];
+      if (state.visibleSeries.credit) activeBarKeys.push('credit');
+      if (state.visibleSeries.debit) activeBarKeys.push('debit');
+      if (state.visibleSeries.balance) activeBarKeys.push('balance');
+
+      const barCount = activeBarKeys.length;
+      const barSpacing = 4;
+      const totalBarGroupWidth = Math.min(groupWidth * 0.72, barCount * 36);
+      const singleBarW = barCount > 0 ? (totalBarGroupWidth - (barSpacing * (barCount - 1))) / barCount : 0;
+
+      const trendPoints = [];
+
+      data.forEach((item, index) => {
+        const groupCenterX = padLeft + (index + 0.5) * groupWidth;
+        const startX = groupCenterX - (totalBarGroupWidth / 2);
+
+        // Subtle column hover backdrop
+        const hoverRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        hoverRect.setAttribute('x', groupCenterX - groupWidth / 2 + 3);
+        hoverRect.setAttribute('y', padTop);
+        hoverRect.setAttribute('width', groupWidth - 6);
+        hoverRect.setAttribute('height', chartH);
+        hoverRect.setAttribute('fill', 'rgba(255, 255, 255, 0.02)');
+        hoverRect.setAttribute('rx', '8');
+        hoverRect.setAttribute('class', 'cursor-pointer transition-all duration-200');
+        hoverRect.addEventListener('mouseenter', (e) => showTooltip(e, item, groupCenterX));
+        hoverRect.addEventListener('mousemove', (e) => updateTooltipPos(e));
+        hoverRect.addEventListener('mouseleave', hideTooltip);
+        barsEl.appendChild(hoverRect);
+
+        // Render visible bars
+        activeBarKeys.forEach((key, bIdx) => {
+          const bx = startX + bIdx * (singleBarW + barSpacing);
+          let val = item[key];
+          let maxVal = (key === 'balance') ? maxBalance : maxFlow;
+          let barHeight = (val / maxVal) * chartH;
+          if (barHeight < 3) barHeight = 3;
+          const by = padTop + chartH - barHeight;
+
+          const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          bar.setAttribute('x', bx);
+          bar.setAttribute('y', by);
+          bar.setAttribute('width', singleBarW);
+          bar.setAttribute('height', barHeight);
+          bar.setAttribute('rx', '4');
+          bar.setAttribute('ry', '4');
+          
+          if (key === 'credit') {
+            bar.setAttribute('fill', 'url(#creditGrad)');
+          } else if (key === 'debit') {
+            bar.setAttribute('fill', 'url(#debitGrad)');
+          } else {
+            bar.setAttribute('fill', 'url(#balanceGrad)');
+          }
+
+          bar.setAttribute('class', 'chart-bar pointer-events-none transition-all duration-500');
+          barsEl.appendChild(bar);
+        });
+
+        // Compute point for trend line
+        const netFlow = item.credit - item.debit;
+        // Map net flow to chart
+        const netH = (item.credit / maxFlow) * chartH;
+        const trendY = padTop + chartH - ((item.balance / maxBalance) * chartH);
+        trendPoints.push({ x: groupCenterX, y: trendY, data: item });
+
+        // X-Axis Category Label
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', groupCenterX);
+        label.setAttribute('y', padTop + chartH + 24);
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('fill', '#94a3b8');
+        label.setAttribute('font-size', '12');
+        label.setAttribute('font-weight', '500');
+        label.textContent = item.month;
+        labelsEl.appendChild(label);
+      });
+
+      // Render Trend Spline if active
+      if (state.visibleSeries.trend && trendPoints.length > 1) {
+        let pathD = `M ${trendPoints[0].x} ${trendPoints[0].y}`;
+        for (let i = 0; i < trendPoints.length - 1; i++) {
+          const p0 = trendPoints[i];
+          const p1 = trendPoints[i + 1];
+          const cpX = (p0.x + p1.x) / 2;
+          pathD += ` C ${cpX} ${p0.y}, ${cpX} ${p1.y}, ${p1.x} ${p1.y}`;
+        }
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', pathD);
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', '#f59e0b');
+        path.setAttribute('stroke-width', '2.5');
+        path.setAttribute('filter', 'url(#glow)');
+        path.setAttribute('stroke-linecap', 'round');
+        trendEl.appendChild(path);
+
+        // Trend nodes
+        trendPoints.forEach(p => {
+          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('cx', p.x);
+          circle.setAttribute('cy', p.y);
+          circle.setAttribute('r', '4');
+          circle.setAttribute('fill', '#f59e0b');
+          circle.setAttribute('stroke', '#0f172a');
+          circle.setAttribute('stroke-width', '2');
+          trendEl.appendChild(circle);
+        });
+      }
+
+      // Update averages in chart header
+      updateAverages(data);
+    }
+
+    // Tooltip handling
+    const tooltip = document.getElementById('chart-tooltip');
+    const chartWrapper = document.getElementById('chart-wrapper');
+
+    function showTooltip(e, item, centerX) {
+      const net = item.credit - item.debit;
+      document.getElementById('tooltip-month').textContent = item.fullDate;
+      document.getElementById('tooltip-credit').textContent = '+' + formatMoney(item.credit);
+      document.getElementById('tooltip-debit').textContent = '-' + formatMoney(item.debit);
+      document.getElementById('tooltip-net').textContent = (net >= 0 ? '+' : '-') + formatMoney(Math.abs(net));
+      document.getElementById('tooltip-balance').textContent = formatMoney(item.balance);
+      
+      const rate = ((net / item.credit) * 100).toFixed(0);
+      document.getElementById('tooltip-variance').textContent = rate + '% saved';
+
+      tooltip.classList.remove('opacity-0');
+      tooltip.classList.add('opacity-100');
+      
+      const wrapperRect = chartWrapper.getBoundingClientRect();
+      const relativeX = (centerX / 1000) * wrapperRect.width;
+      tooltip.style.left = `${relativeX}px`;
+      tooltip.style.top = '120px';
+    }
+
+    function updateTooltipPos(e) {
+      // position fixed to column centerX
+    }
+
+    function hideTooltip() {
+      tooltip.classList.remove('opacity-100');
+      tooltip.classList.add('opacity-0');
+    }
+
+    // Calculate & update chart header summary
+    function updateAverages(data) {
+      let totalC = 0, totalD = 0;
+      data.forEach(d => {
+        totalC += d.credit;
+        totalD += d.debit;
+      });
+      const avgC = totalC / data.length;
+      const avgD = totalD / data.length;
+      const avgNet = avgC - avgD;
+
+      document.getElementById('stat-avg-credit').textContent = formatShortMoney(avgC);
+      document.getElementById('stat-avg-debit').textContent = formatShortMoney(avgD);
+      document.getElementById('stat-avg-net').textContent = (avgNet >= 0 ? '+' : '-') + formatShortMoney(Math.abs(avgNet));
+    }
+
+    // Render Transaction List
+    function renderTransactions() {
+      const listEl = document.getElementById('transaction-list');
+      listEl.innerHTML = '';
+
+      let filtered = state.transactions.filter(t => {
+        if (state.filterType === 'CREDIT') return t.type === 'credit';
+        if (state.filterType === 'DEBIT') return t.type === 'debit';
+        return true;
+      });
+
+      if (state.searchQuery.trim() !== '') {
+        const q = state.searchQuery.toLowerCase();
+        filtered = filtered.filter(t => 
+          t.title.toLowerCase().includes(q) || 
+          t.category.toLowerCase().includes(q)
+        );
+      }
+
+      document.getElementById('tx-count').textContent = `Showing ${filtered.length} entries`;
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = `
+          <div class="py-12 text-center text-slate-500 text-xs">
+            <svg class="w-8 h-8 mx-auto mb-2 text-slate-600 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            No transactions match your current filter.
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(tx => {
+        const isCredit = tx.type === 'credit';
+        const card = document.createElement('div');
+        card.className = "flex items-center justify-between p-3 rounded-xl bg-slate-950/50 border border-slate-800/80 hover:border-slate-700/80 hover:bg-slate-950 transition-all text-xs group";
+
+        card.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center ${isCredit ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">
+              ${isCredit ? `
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+              ` : `
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              `}
+            </div>
+            <div>
+              <p class="font-semibold text-slate-200 group-hover:text-white transition-colors">${tx.title}</p>
+              <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                <span class="px-1.5 py-0.2 rounded bg-slate-900 border border-slate-800">${tx.category}</span>
+                <span>${tx.date}</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="font-mono-num font-bold text-sm ${isCredit ? 'text-emerald-400' : 'text-slate-200'}">
+              ${isCredit ? '+' : '-'}${formatMoney(tx.amount)}
+            </span>
+            <button onclick="deleteTransaction('${tx.id}')" class="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-400 transition-all rounded" title="Delete">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        `;
+        listEl.appendChild(card);
+      });
+    }
+
+    // Filter transactions
+    function filterTransactions(type) {
+      state.filterType = type;
+      ['ALL', 'CREDIT', 'DEBIT'].forEach(t => {
+        const btn = document.getElementById('filter-' + t.toLowerCase());
+        if (t === type) {
+          btn.className = "px-3 py-1 rounded-lg font-medium bg-slate-800 text-white transition-all";
+        } else {
+          btn.className = "px-3 py-1 rounded-lg font-medium text-slate-400 hover:text-white transition-all";
+        }
+      });
+      renderTransactions();
+    }
+
+    function handleSearch(val) {
+      state.searchQuery = val;
+      renderTransactions();
+    }
+
+    function deleteTransaction(id) {
+      const idx = state.transactions.findIndex(t => t.id === id);
+      if (idx !== -1) {
+        state.transactions.splice(idx, 1);
+        renderTransactions();
+        showToast('Transaction removed');
+      }
+    }
+
+    // Render Category Breakdown Bars
+    function renderCategoryBars() {
+      const container = document.getElementById('category-bars');
+      container.innerHTML = '';
+
+      const totalSpent = categoryConfig.reduce((acc, c) => acc + c.amount, 0);
+
+      categoryConfig.forEach(cat => {
+        const pct = ((cat.amount / totalSpent) * 100).toFixed(1);
+        const item = document.createElement('div');
+        item.className = "space-y-1.5";
+        item.innerHTML = `
+          <div class="flex justify-between items-center text-slate-300">
+            <span class="font-medium">${cat.name}</span>
+            <div class="flex items-center gap-2 font-mono-num">
+              <span class="text-slate-400 text-[11px]">${pct}%</span>
+              <span class="font-semibold text-white">${formatMoney(cat.amount)}</span>
+            </div>
+          </div>
+          <div class="w-full bg-slate-800/80 rounded-full h-1.5 overflow-hidden">
+            <div class="${cat.color} h-1.5 rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    // Recalculate KPIs
+    function updateKPIs() {
+      let totalC = 0, totalD = 0;
+      state.transactions.forEach(t => {
+        if (t.type === 'credit') totalC += t.amount;
+        else totalD += t.amount;
+      });
+
+      const netSurplus = totalC - totalD;
+      const rate = totalC > 0 ? ((netSurplus / totalC) * 100).toFixed(1) : '0.0';
+
+      document.getElementById('kpi-credit').textContent = '+' + formatMoney(totalC);
+      document.getElementById('kpi-debit').textContent = '-' + formatMoney(totalD);
+      document.getElementById('kpi-net').textContent = '(' + (netSurplus >= 0 ? '+' : '-') + formatMoney(Math.abs(netSurplus)) + ')';
+      document.getElementById('kpi-rate').textContent = rate + '%';
+      document.getElementById('kpi-progress').style.width = Math.min(Math.max(rate, 0), 100) + '%';
+    }
+
+    // Modal Operations
+    const modal = document.getElementById('tx-modal');
+    const modalCard = document.getElementById('modal-card');
+
+    function openModal() {
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modalCard.classList.remove('scale-95');
+      }, 10);
+      document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
+    }
+
+    function closeModal() {
+      modal.classList.add('opacity-0');
+      modalCard.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 200);
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const type = document.querySelector('input[name="txType"]:checked').value;
+      const title = document.getElementById('tx-title').value;
+      const amount = parseFloat(document.getElementById('tx-amount').value);
+      const category = document.getElementById('tx-category').value;
+      const date = document.getElementById('tx-date').value;
+
+      if (!title || isNaN(amount) || amount <= 0) return;
+
+      const newTx = {
+        id: 'tx-' + Date.now(),
+        title,
+        type,
+        amount,
+        category,
+        date
+      };
+
+      state.transactions.unshift(newTx);
+
+      // Dynamically reflect in the latest month of the chart dataset
+      const currentDataset = getCurrentData();
+      const latestMonth = currentDataset[currentDataset.length - 1];
+      if (type === 'credit') {
+        latestMonth.credit += amount;
+        latestMonth.balance += amount;
+      } else {
+        latestMonth.debit += amount;
+        latestMonth.balance -= amount;
+      }
+
+      closeModal();
+      document.getElementById('tx-form').reset();
+      updateDashboard();
+      showToast('Transaction added and chart updated!');
+    }
+
+    // Toast alert
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      toast.classList.remove('translate-y-12', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-12', 'opacity-0');
+      }, 2500);
+    }
+
+    // Export CSV
+    function exportData() {
+      let csvContent = "data:text/csv;charset=utf-8,ID,Title,Type,Amount,Category,Date\n";
+      state.transactions.forEach(t => {
+        csvContent += `${t.id},"${t.title}",${t.type},${t.amount},"${t.category}",${t.date}\n`;
+      });
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "aura_transactions.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('CSV export downloaded');
+    }
+
+    // Dark/Light Theme Switch
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      if (isDark) {
+        document.body.className = "bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300";
+      } else {
+        document.body.className = "bg-slate-50 text-slate-900 min-h-screen antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300";
+      }
+      renderChart();
+    }
+
+    // Master update
+    function updateDashboard() {
+      renderChart();
+      renderTransactions();
+      renderCategoryBars();
+      updateKPIs();
+    }
+
+    // PWA & Installation Handling
+    let deferredPrompt = null;
+    const installBtn = document.getElementById('btn-install-app');
+    const installModal = document.getElementById('install-modal');
+    const installModalCard = document.getElementById('install-modal-card');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (installBtn) {
+        installBtn.classList.remove('hidden');
+      }
+    });
+
+    function handleInstallClick() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            showToast('App installing to home screen!');
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        openInstallModal();
+      }
+    }
+
+    function openInstallModal() {
+      installModal.classList.remove('hidden');
+      setTimeout(() => {
+        installModal.classList.remove('opacity-0');
+        installModalCard.classList.remove('scale-95');
+      }, 10);
+    }
+
+    function closeInstallModal() {
+      installModal.classList.add('opacity-0');
+      installModalCard.classList.add('scale-95');
+      setTimeout(() => {
+        installModal.classList.add('hidden');
+      }, 200);
+    }
+
+    // Register Service Worker for offline capability
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Aura Service Worker registered:', reg.scope))
+          .catch((err) => console.log('Service Worker registration skipped/failed:', err));
+      });
+    }
+
+    // ==========================================
+    // 100% OFFLINE BANK SMS PARSER & ENGINE
+    // ==========================================
+    const sampleSmsList = [
+      "A/C XX4821 debited for Rs 1499.00 on 20-OCT-26 at AMAZON. Avl Bal Rs 52,301.00 - HDFC Bank",
+      "Sent Rs.420.00 from SBI A/c ...7812 to SWIGGY UPI ref 3291823901. Avl Bal Rs 28,450.00",
+      "Your A/c 9012 is credited with INR 65000.00 on 18-Oct-26 by INFOSYS SALARY. Avl Bal: INR 117301.00",
+      "Paid Rs 85.00 via Google Pay to STARBUCKS COFFEE on 17-Oct-26. Ref no 902183",
+      "Alert: You've spent USD 45.00 at TARGET STORES with Card ending 3310 on 16-Oct-26"
+    ];
+
+    let currentParsedSms = null;
+
+    const AuraSmsEngine = {
+      creditKeywords: ['credited', 'credited with', 'received', 'deposited', 'refunded', 'salary', 'cashback', 'added to'],
+      debitKeywords: ['debited', 'spent', 'paid', 'sent to', 'withdrawn', 'purchase', 'transaction of', 'transferred to', 'vpa'],
+      
+      parse(text) {
+        if (!text || text.trim() === '') return null;
+        const lower = text.toLowerCase();
+
+        // 1. Determine Type
+        let type = 'debit';
+        if (this.creditKeywords.some(k => lower.includes(k))) {
+          type = 'credit';
+        }
+
+        // 2. Extract Amount
+        let amount = 0;
+        const amtMatch = text.match(/(?:Rs\.?|INR|USD|\$|₹)\s*([\d,]+(?:\.\d{1,2})?)/i) ||
+                         text.match(/([\d,]+(?:\.\d{1,2})?)\s*(?:INR|USD|Rs\.?|₹)/i) ||
+                         text.match(/(?:debited\s+by|credited\s+with|spent|paid)\s*([\d,]+(?:\.\d{1,2})?)/i);
+        if (amtMatch) {
+          amount = parseFloat(amtMatch[1].replace(/,/g, ''));
+        }
+        if (isNaN(amount) || amount <= 0) return null;
+
+        // 3. Extract Merchant
+        let merchant = 'Bank Payment';
+        const merchMatch = text.match(/(?:at|to|info)\s+([A-Za-z0-9\s\.\*\-\&]+?)(?:\s+on|\s+ref|\s+avl|\s+balance|\s+using|\.|\,|$)/i) ||
+                           text.match(/(?:vpa|upi)\s+([A-Za-z0-9\.\@\_\-]+)/i);
+        if (merchMatch) {
+          const rawM = merchMatch[1].trim();
+          if (rawM.length >= 3 && rawM.length <= 35 && !rawM.toLowerCase().includes('a/c')) {
+            merchant = rawM;
+          }
+        }
+
+        // 4. Extract Account Tail
+        let accountTail = null;
+        const accMatch = text.match(/(?:a\/c|acct|account|card|ending)\s*(?:no\.?|num)?\s*(?:[xX*]*([0-9]{4}))/i) ||
+                         text.match(/(?:[xX*]{2,})([0-9]{4})/);
+        if (accMatch) {
+          accountTail = accMatch[1];
+        }
+
+        // 5. Extract Category
+        const category = this.inferCategory(merchant, text);
+
+        // Format clean title
+        const cleanTitle = merchant.split(' ')
+          .filter(Boolean)
+          .slice(0, 3)
+          .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          .join(' ') || (type === 'credit' ? 'Bank Deposit' : 'Card Payment');
+
+        return {
+          id: 'sms-' + Date.now(),
+          title: cleanTitle,
+          type,
+          amount,
+          category,
+          date: new Date().toISOString().split('T')[0],
+          accountTail: accountTail ? 'XX' + accountTail : null,
+          rawText: text
+        };
+      },
+
+      inferCategory(merchant, text) {
+        const t = (merchant + ' ' + text).toLowerCase();
+        if (t.includes('salary') || t.includes('payroll') || t.includes('wages')) return 'Salary & Wages';
+        if (t.includes('dividend') || t.includes('interest') || t.includes('zerodha') || t.includes('groww') || t.includes('vanguard')) return 'Investment & Dividends';
+        if (t.includes('swiggy') || t.includes('zomato') || t.includes('starbucks') || t.includes('food') || t.includes('blinkit') || t.includes('zepto') || t.includes('supermarket') || t.includes('groceries')) return 'Groceries & Food';
+        if (t.includes('uber') || t.includes('ola') || t.includes('fuel') || t.includes('petrol') || t.includes('metro')) return 'Transportation';
+        if (t.includes('rent') || t.includes('lease') || t.includes('nobroker')) return 'Housing & Rent';
+        if (t.includes('netflix') || t.includes('spotify') || t.includes('aws') || t.includes('amazon') || t.includes('apple') || t.includes('google')) return 'Tech & Subscriptions';
+        if (t.includes('electricity') || t.includes('water') || t.includes('airtel') || t.includes('jio') || t.includes('wifi')) return 'Utilities & Bills';
+        if (t.includes('movie') || t.includes('flight') || t.includes('hotel') || t.includes('travel')) return 'Leisure & Travel';
+        return type === 'credit' ? 'Freelance & Consulting' : 'Groceries & Food';
+      }
+    };
+
+    // SMS Modal Operations
+    const smsModal = document.getElementById('sms-modal');
+    const smsModalCard = document.getElementById('sms-modal-card');
+
+    function openSmsModal() {
+      smsModal.classList.remove('hidden');
+      setTimeout(() => {
+        smsModal.classList.remove('opacity-0');
+        smsModalCard.classList.remove('scale-95');
+      }, 10);
+      checkAndroidEnvironment();
+    }
+
+    function closeSmsModal() {
+      smsModal.classList.add('opacity-0');
+      smsModalCard.classList.add('scale-95');
+      setTimeout(() => {
+        smsModal.classList.add('hidden');
+      }, 200);
+    }
+
+    function loadSampleSms(index) {
+      document.getElementById('sms-input-text').value = sampleSmsList[index];
+      executeSmsParse();
+    }
+
+    function executeSmsParse() {
+      const text = document.getElementById('sms-input-text').value;
+      const previewCard = document.getElementById('sms-preview-card');
+      const addBtn = document.getElementById('btn-add-sms');
+
+      if (!text || text.trim() === '') {
+        previewCard.classList.add('hidden');
+        addBtn.disabled = true;
+        return;
+      }
+
+      currentParsedSms = AuraSmsEngine.parse(text);
+
+      if (currentParsedSms) {
+        previewCard.classList.remove('hidden');
+        addBtn.disabled = false;
+
+        const isCredit = currentParsedSms.type === 'credit';
+        const typeBadge = document.getElementById('preview-type-badge');
+        typeBadge.textContent = isCredit ? 'CREDIT (INFLOW)' : 'DEBIT (OUTFLOW)';
+        typeBadge.className = isCredit ? 'px-2 py-0.5 rounded font-semibold text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'px-2 py-0.5 rounded font-semibold text-xs bg-rose-500/10 text-rose-400 border border-rose-500/30';
+
+        document.getElementById('preview-amount').textContent = (isCredit ? '+' : '-') + formatMoney(currentParsedSms.amount);
+        document.getElementById('preview-amount').className = isCredit ? 'font-bold text-emerald-400 text-sm' : 'font-bold text-rose-400 text-sm';
+        document.getElementById('preview-merchant').textContent = currentParsedSms.title;
+        document.getElementById('preview-category').textContent = currentParsedSms.category;
+        document.getElementById('preview-account').textContent = currentParsedSms.accountTail || 'N/A';
+      } else {
+        previewCard.classList.add('hidden');
+        addBtn.disabled = true;
+        showToast('Could not find transaction amount in text');
+      }
+    }
+
+    function confirmAndAddSms() {
+      if (!currentParsedSms) return;
+
+      // Add to transactions ledger
+      state.transactions.unshift({
+        id: currentParsedSms.id,
+        title: currentParsedSms.title,
+        type: currentParsedSms.type,
+        amount: currentParsedSms.amount,
+        category: currentParsedSms.category,
+        date: currentParsedSms.date
+      });
+
+      // Update current timeframe latest column in bar graph
+      const currentDataset = getCurrentData();
+      const latestMonth = currentDataset[currentDataset.length - 1];
+      if (currentParsedSms.type === 'credit') {
+        latestMonth.credit += currentParsedSms.amount;
+        latestMonth.balance += currentParsedSms.amount;
+      } else {
+        latestMonth.debit += currentParsedSms.amount;
+        latestMonth.balance -= currentParsedSms.amount;
+      }
+
+      closeSmsModal();
+      document.getElementById('sms-input-text').value = '';
+      currentParsedSms = null;
+      updateDashboard();
+      showToast('SMS parsed and added to bar graph!');
+    }
+
+    // Android Native Bridge Integration
+    function checkAndroidEnvironment() {
+      const bannerStatus = document.getElementById('sms-env-status');
+      const scanBtn = document.getElementById('btn-native-scan');
+      
+      if (window.AndroidBridge && window.AndroidBridge.isAndroidApp()) {
+        bannerStatus.textContent = '🟢 Native Android SMS Listener Active';
+        scanBtn.classList.remove('hidden');
+      } else {
+        bannerStatus.textContent = 'Local Offline Regex Engine Ready';
+        scanBtn.classList.add('hidden');
+      }
+    }
+
+    function triggerAndroidScan() {
+      if (window.AndroidBridge && window.AndroidBridge.scanInboxSms) {
+        showToast('Scanning Android SMS inbox...');
+        const json = window.AndroidBridge.scanInboxSms();
+        try {
+          const list = JSON.parse(json);
+          if (list && list.length > 0) {
+            window.onInboxLoaded(list);
+          } else {
+            showToast('No new bank SMS found in inbox');
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
+    // Called automatically from Kotlin MainActivity when new SMS arrives
+    window.onNativeSmsReceived = function(id, title, type, amount, category, date) {
+      state.transactions.unshift({ id, title, type, amount, category, date });
+      const currentDataset = getCurrentData();
+      const latestMonth = currentDataset[currentDataset.length - 1];
+      if (type === 'credit') {
+        latestMonth.credit += amount;
+        latestMonth.balance += amount;
+      } else {
+        latestMonth.debit += amount;
+        latestMonth.balance -= amount;
+      }
+      updateDashboard();
+      showToast('New Bank SMS: ' + (type === 'credit' ? '+' : '-') + formatMoney(amount) + ' at ' + title);
+    };
+
+    // Called automatically when past SMS inbox is scanned on Android startup
+    window.onInboxLoaded = function(transactions) {
+      if (!transactions || transactions.length === 0) return;
+      let added = 0;
+      transactions.forEach(t => {
+        if (!state.transactions.some(existing => existing.id === t.id)) {
+          state.transactions.unshift({
+            id: t.id,
+            title: t.title,
+            type: t.type,
+            amount: t.amount,
+            category: t.category,
+            date: t.date
+          });
+          added++;
+        }
+      });
+      if (added > 0) {
+        updateDashboard();
+        showToast('Imported ' + added + ' transactions from Android SMS!');
+      }
+    };
+
+    // Initial load
+    window.addEventListener('DOMContentLoaded', () => {
+      updateDashboard();
+      window.addEventListener('resize', renderChart);
+    });
+  </script>
+</body>
+</html>
