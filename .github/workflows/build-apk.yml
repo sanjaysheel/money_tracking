@@ -28,9 +28,16 @@ jobs:
       with:
         gradle-version: 8.5
 
+    - name: Configure AndroidX Properties
+      working-directory: ./android
+      run: |
+        echo "android.useAndroidX=true" >> gradle.properties
+        echo "android.nonTransitiveRClass=true" >> gradle.properties
+        echo "org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8" >> gradle.properties
+
     - name: Build Debug APK
       working-directory: ./android
-      run: gradle assembleDebug --stacktrace
+      run: gradle assembleDebug -Pandroid.useAndroidX=true -Pandroid.nonTransitiveRClass=true --stacktrace
       env:
         ANDROID_HOME: /usr/local/lib/android/sdk
 
