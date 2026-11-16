@@ -257,28 +257,44 @@
       }
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: 768px) {
+      .top-telemetry-bar {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .subnav-actions-group .audio-toggle-pill {
+        display: none !important;
+      }
+      .mobile-nav-panel .audio-toggle-pill {
+        display: inline-flex !important;
+      }
       .subnav-track {
         height: 54px;
-        gap: 6px;
+        padding: 0 14px;
       }
       .subnav-brand-title {
-        font-size: 0.85rem !important;
+        font-size: 0.88rem !important;
       }
       .subnav-brand-sub {
         display: none !important;
       }
-      .audio-toggle-pill .audio-label {
-        display: none;
+      .subnav-cta-btn {
+        padding: 6px 12px !important;
+        font-size: 0.75rem !important;
       }
-      .audio-toggle-pill {
-        padding: 5px 8px;
+      .hero-chip-desktop {
+        display: none !important;
       }
+      .hero-chip-mobile {
+        display: inline !important;
+      }
+    }
+
+    @media (max-width: 420px) {
       .subnav-cta-btn span {
         display: none;
-      }
-      .subnav-cta-btn {
-        padding: 6px 10px !important;
       }
       .subnav-cta-btn::after {
         content: 'APK';
@@ -390,6 +406,13 @@
 
     <!-- Mobile Slide Panel -->
     <div id="mobile-nav-menu" class="mobile-nav-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 6px 12px 6px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 8px;">
+        <span style="font-size: 0.75rem; color: #94a3b8; font-family: var(--font-mono); text-transform: uppercase;">Tactile Sound</span>
+        <button id="audio-toggle-btn-mobile" class="audio-toggle-pill" aria-label="Toggle Tactile Audio Feedback">
+          <span class="audio-pulse-indicator"></span>
+          <span class="audio-label">AUDIO: OFF</span>
+        </button>
+      </div>
       <a href="#overview" class="subnav-link">Overview</a>
       <a href="#simulator" class="subnav-link" style="color: #818cf8; font-weight: 700;">Live Interactive Phone Simulator</a>
       <a href="#playground" class="subnav-link">Live Feature Playground</a>
@@ -401,7 +424,7 @@
       <a href="#math-engine" class="subnav-link">Algorithmic Run-Rate Math</a>
       <a href="#specs" class="subnav-link">Complete Technical Specifications</a>
       <a href="#compare" class="subnav-link">Architectural Parity &amp; Privacy Audit</a>
-      <a href="#download" class="subnav-link" style="color: var(--brand-primary-light);">Download Verified APK &amp; Checksums</a>
+      <a href="#download" class="subnav-link" style="color: var(--brand-accent-light); font-weight: 700;">Download Native APK (4.6 MB)</a>
     </div>
   </nav>
 
@@ -418,9 +441,10 @@
       
       <!-- Architectural Tag -->
       <div class="hero-badge">
-        <span class="telemetry-chip" style="padding: 5px 14px; font-size: 0.75rem; border-color: rgba(99, 102, 241, 0.4);">
+        <span class="telemetry-chip hero-badge-chip" style="padding: 5px 14px; font-size: 0.75rem; border-color: rgba(99, 102, 241, 0.4);">
           <span style="width: 8px; height: 8px; border-radius: 50%; background: #6366f1; box-shadow: 0 0 10px #6366f1;"></span>
-          ARCHITECTURE SPECIFICATION &bull; REVERSED FROM LOCAL KOTLIN CORE
+          <span class="hero-chip-desktop">ARCHITECTURE SPECIFICATION &bull; REVERSED FROM LOCAL KOTLIN CORE</span>
+          <span class="hero-chip-mobile">LOCAL KOTLIN CORE &bull; 100% AIR-GAPPED</span>
         </span>
       </div>
 
@@ -437,17 +461,17 @@
 
       <!-- Primary Action Buttons -->
       <div class="hero-actions">
-        <a href="#simulator" class="btn btn-primary" style="background: linear-gradient(135deg, #10b981, #6366f1); box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);">
+        <a href="assets/Aura_Finance.apk" download class="btn btn-primary" style="background: linear-gradient(135deg, #10b981, #6366f1); box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span>Download Native APK (4.6 MB)</span>
+        </a>
+        <a href="#simulator" class="btn btn-outline">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-          <span>Interact With Virtual Phone Below</span>
+          <span>Interact With Virtual Phone Below &darr;</span>
         </a>
-        <a href="#playground" class="btn btn-outline">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <a href="#playground" class="btn btn-outline" style="font-family: var(--font-mono); font-size: 0.8125rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           <span>Live Feature Playground</span>
-        </a>
-        <a href="#download" class="btn btn-outline" style="border-color: rgba(16, 185, 129, 0.4); color: #34d399; font-family: var(--font-mono); font-size: 0.8125rem;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-          <span>Download Signed APK (4.6 MB)</span>
         </a>
       </div>
 

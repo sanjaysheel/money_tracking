@@ -24,7 +24,7 @@
   .simulator-layout-grid {
     grid-template-columns: 1fr;
     justify-items: center;
-    gap: 2.5rem;
+    gap: 2rem;
   }
   .phone-chassis {
     order: 1;
@@ -38,46 +38,89 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .phone-chassis {
-    max-width: 100% !important;
+    max-width: 320px !important;
     width: 100% !important;
-    height: 680px;
-    border-radius: 36px;
-    padding: 8px;
+    height: 540px !important;
+    border-radius: 36px !important;
+    padding: 6px !important;
     box-shadow: 
-      0 0 0 1px rgba(255, 255, 255, 0.12),
-      0 0 0 3px #1a2030,
-      0 15px 40px rgba(0, 0, 0, 0.7);
+      0 0 0 1px rgba(255, 255, 255, 0.15),
+      0 0 0 3px #151a28,
+      0 20px 45px rgba(0, 0, 0, 0.8) !important;
+    margin: 0 auto !important;
+    touch-action: pan-y !important;
   }
   .phone-screen {
-    border-radius: 28px;
+    border-radius: 30px !important;
+    overscroll-behavior-y: contain !important;
   }
   .phone-button-volume-up,
   .phone-button-volume-down,
   .phone-button-power {
     display: none !important;
   }
+  .sim-status-bar {
+    padding: 4px 14px 2px 14px !important;
+  }
+  .sim-island-pill {
+    width: 76px !important;
+    height: 18px !important;
+  }
+  .sim-content-area {
+    padding: 10px 10px 65px 10px !important;
+  }
+  .sim-hero-card {
+    padding: 14px !important;
+    border-radius: 16px !important;
+  }
+  .sim-net-balance {
+    font-size: 22px !important;
+  }
   .sim-remote-deck {
-    padding: 16px;
-    border-radius: 18px;
+    width: 100% !important;
+    padding: 14px !important;
+    border-radius: 16px !important;
+    margin-top: 1rem !important;
   }
   .remote-title {
-    font-size: 1.25rem;
+    font-size: 1.15rem !important;
+  }
+  .remote-desc {
+    font-size: 0.8125rem !important;
+    line-height: 1.5 !important;
   }
   .remote-btn-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+  }
+  .remote-btn {
+    padding: 7px 10px !important;
+    font-size: 0.75rem !important;
+    border-radius: 10px !important;
+  }
+  .remote-btn svg {
+    width: 13px !important;
+    height: 13px !important;
   }
 }
 
 @media (max-width: 360px) {
   .phone-chassis {
-    height: 610px;
-    border-radius: 28px;
-    padding: 6px;
+    max-width: 290px !important;
+    height: 500px !important;
+    border-radius: 28px !important;
+    padding: 5px !important;
   }
   .phone-screen {
-    border-radius: 22px;
+    border-radius: 23px !important;
+  }
+  .sim-remote-deck {
+    padding: 12px !important;
+  }
+  .remote-btn-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 

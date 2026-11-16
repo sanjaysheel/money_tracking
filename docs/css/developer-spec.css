@@ -1021,4 +1021,65 @@
   }
 }
 
+/* ---- COMPREHENSIVE MOBILE POLISH & TOUCH TUNING ---- */
+@media (max-width: 640px) {
+  .workbench-tab-bar {
+    padding: 0.35rem 0.5rem;
+    gap: 0.5rem;
+  }
+  .workbench-tab-btn {
+    padding: 0.5rem 0.65rem;
+    font-size: 0.6875rem;
+  }
+  .workbench-code-content pre {
+    font-size: 0.6875rem !important;
+    padding: 12px !important;
+  }
+  .interactive-pipeline-box {
+    padding: 14px;
+    border-radius: 14px;
+  }
+  .pipeline-node {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+  }
+  .pipeline-telemetry-hud {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    font-size: 0.6875rem;
+  }
+  .runway-lab-box {
+    padding: 14px;
+    border-radius: 14px;
+  }
+  .runway-scorecard {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .visual-card {
+    padding: 14px;
+    border-radius: 16px;
+  }
+  .spec-item {
+    gap: 10px;
+  }
+  .vector-glyph {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  .vector-glyph svg {
+    width: 18px;
+    height: 18px;
+  }
+  .glass-studio-preview {
+    min-height: 150px;
+    padding: 14px;
+  }
+  .glass-live-specimen {
+    padding: 14px;
+  }
+}
+
 

@@ -691,19 +691,21 @@ function playTactileClick(freq = 1100, duration = 0.035, type = 'sine') {
 }
 
 function initTactileAudio() {
-  const audioToggle = document.getElementById('audio-toggle-btn');
-  if (audioToggle) {
-    audioToggle.addEventListener('click', () => {
+  const audioToggles = document.querySelectorAll('#audio-toggle-btn, #audio-toggle-btn-mobile');
+  audioToggles.forEach(toggle => {
+    toggle.addEventListener('click', () => {
       soundEnabled = !soundEnabled;
-      audioToggle.classList.toggle('active', soundEnabled);
-      const label = audioToggle.querySelector('.audio-label');
-      if (label) label.textContent = soundEnabled ? 'AUDIO: ON' : 'AUDIO: OFF';
+      audioToggles.forEach(t => {
+        t.classList.toggle('active', soundEnabled);
+        const label = t.querySelector('.audio-label');
+        if (label) label.textContent = soundEnabled ? 'AUDIO: ON' : 'AUDIO: OFF';
+      });
       if (soundEnabled) {
         getAudioContext();
         playTactileClick(1320, 0.045);
       }
     });
-  }
+  });
 
   // Bind subtle micro-clicks to interactive elements
   document.querySelectorAll('button, .subnav-link, .sandbox-pill, .dlt-filter-btn, .workbench-tab-btn, .phone-tab-btn, .tactile-switch input, .exploded-layer-card').forEach(el => {
