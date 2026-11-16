@@ -33,45 +33,96 @@
       background-size: 100% 100%, 48px 48px, 48px 48px;
     }
 
+    /* Engineering Telemetry Top Bar */
+    .top-telemetry-bar {
+      background: #040508;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 7px 0;
+      font-size: 0.75rem;
+      position: relative;
+      z-index: 1000;
+      overflow: hidden;
+    }
+
     /* Subnav */
     .product-subnav {
       position: sticky;
       top: 0;
       z-index: 999;
-      background: rgba(5, 7, 13, 0.9);
+      background: rgba(5, 7, 13, 0.96);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       transition: all 0.3s ease;
+      width: 100%;
     }
     .subnav-track {
       display: flex;
       align-items: center;
       justify-content: space-between;
       height: 60px;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 clamp(1rem, 2.5vw, 2.5rem);
+      gap: 12px;
+      overflow: hidden;
     }
     .subnav-brand-group {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex-shrink: 0 !important;
+      min-width: max-content;
+      white-space: nowrap !important;
+      text-decoration: none;
+    }
+    .subnav-brand-title {
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      white-space: nowrap !important;
+    }
+    .subnav-brand-sub {
+      font-size: 0.625rem;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-family: var(--font-mono);
+      white-space: nowrap !important;
     }
     .subnav-links-row {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       list-style: none;
+      margin: 0;
+      padding: 0;
+      flex-shrink: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .subnav-links-row::-webkit-scrollbar {
+      display: none;
     }
     .subnav-link {
       color: #94a3b8;
       font-size: 0.8125rem;
       font-weight: 600;
-      padding: 6px 10px;
+      padding: 6px 9px;
       border-radius: 6px;
       text-decoration: none;
       transition: all 0.2s ease;
       letter-spacing: -0.01em;
       font-family: var(--font-display);
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .subnav-link:hover, .subnav-link.active {
       color: #fff;
@@ -81,6 +132,12 @@
       color: #818cf8;
       border-bottom: 2px solid #818cf8;
       border-radius: 6px 6px 0 0;
+    }
+    .subnav-actions-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0 !important;
     }
 
     /* Telemetry micro pills */
@@ -185,7 +242,13 @@
       border-color: #818cf8;
     }
 
-    @media (max-width: 1240px) {
+    @media (max-width: 1440px) {
+      .subnav-link-secondary {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 1100px) {
       .subnav-links-row {
         display: none !important;
       }
@@ -252,7 +315,7 @@
 <body class="bg-grid-tech">
 
   <!-- ==================== 1. ENGINEERING TELEMETRY TOP BAR ==================== -->
-  <div style="background: #040508; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding: 6px 0; font-size: 0.75rem;">
+  <div class="top-telemetry-bar">
     <div class="container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
       <div style="display: flex; align-items: center; gap: 14px;">
         <span class="telemetry-chip">
@@ -275,19 +338,19 @@
 
   <!-- ==================== 2. BENQ-STYLE PRODUCT STICKY SUB-NAV ==================== -->
   <nav class="product-subnav" id="product-subnav">
-    <div class="container subnav-track">
+    <div class="subnav-track">
       <!-- Left: Product Brand Identification -->
-      <a href="#overview" class="subnav-brand-group" style="text-decoration: none;">
-        <div class="nav-brand-icon" style="width: 34px; height: 34px; background: linear-gradient(135deg, #6366f1, #10b981);">
+      <a href="#overview" class="subnav-brand-group" style="text-decoration: none; flex-shrink: 0; white-space: nowrap;">
+        <div class="nav-brand-icon" style="width: 34px; height: 34px; background: linear-gradient(135deg, #6366f1, #10b981); flex-shrink: 0;">
           <div class="nav-brand-icon-inner" style="font-size: 0.85rem; font-weight: 800;">
             AF
           </div>
         </div>
-        <div>
-          <div class="subnav-brand-title" style="font-size: 1rem; font-weight: 900; color: #fff; letter-spacing: -0.02em; line-height: 1.1;">
+        <div style="white-space: nowrap; flex-shrink: 0;">
+          <div class="subnav-brand-title" style="font-size: 0.95rem; font-weight: 900; color: #fff; letter-spacing: -0.02em; line-height: 1.15; white-space: nowrap;">
             AURA <span style="color: #818cf8; font-weight: 600;">FINANCE</span>
           </div>
-          <div class="subnav-brand-sub" style="font-size: 0.65rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--font-mono);">
+          <div class="subnav-brand-sub" style="font-size: 0.625rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--font-mono); white-space: nowrap;">
             Sovereign Wealth Engine
           </div>
         </div>
@@ -299,18 +362,18 @@
         <li><a href="#simulator" class="subnav-link">Virtual Phone</a></li>
         <li><a href="#playground" class="subnav-link">Playground</a></li>
         <li><a href="#exploded-view" class="subnav-link">6-Layer Stack</a></li>
-        <li><a href="#sms-engine" class="subnav-link">Ingestion</a></li>
-        <li><a href="#analytics" class="subnav-link">Analytics</a></li>
-        <li><a href="#scheduler" class="subnav-link">Scheduler</a></li>
-        <li><a href="#workbench" class="subnav-link">Source Workbench</a></li>
-        <li><a href="#math-engine" class="subnav-link">Runrate Math</a></li>
+        <li><a href="#sms-engine" class="subnav-link subnav-link-secondary">Ingestion</a></li>
+        <li><a href="#analytics" class="subnav-link subnav-link-secondary">Analytics</a></li>
+        <li><a href="#scheduler" class="subnav-link subnav-link-secondary">Scheduler</a></li>
+        <li><a href="#workbench" class="subnav-link">Workbench</a></li>
+        <li><a href="#math-engine" class="subnav-link subnav-link-secondary">Math</a></li>
         <li><a href="#specs" class="subnav-link">Specs</a></li>
-        <li><a href="#compare" class="subnav-link">Parity Audit</a></li>
+        <li><a href="#compare" class="subnav-link subnav-link-secondary">Parity</a></li>
         <li><a href="#download" class="subnav-link">Download</a></li>
       </ul>
 
       <!-- Right: Action CTA & Mobile Trigger -->
-      <div style="display: flex; align-items: center; gap: 8px;">
+      <div class="subnav-actions-group" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
         <button id="audio-toggle-btn" class="audio-toggle-pill" aria-label="Toggle Tactile Audio Feedback" title="Toggle Tactile Audio Clicks">
           <span class="audio-pulse-indicator"></span>
           <span class="audio-label">AUDIO: OFF</span>
