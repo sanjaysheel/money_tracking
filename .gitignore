@@ -1,0 +1,21 @@
+# Gradle & Android build artifacts
+.gradle/
+**/build/
+android/.gradle/
+android/app/build/
+
+# Local configuration & IDE
+local.properties
+android/local.properties
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Signing keystores (keep sensitive credentials out of version control)
+*.keystore
+*.jks
+
+# Temporary scratch files
+temp_insights_sections.html
+*.log

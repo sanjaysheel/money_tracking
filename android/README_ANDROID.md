@@ -37,29 +37,25 @@ android/
 
 ---
 
-## ✦ How to Build and Run on Your Android Phone
+## ✦ How to Build and Run Manually
 
-### Step 1: Open in Android Studio
-1. Launch **Android Studio** on your computer.
-2. Click **File -> Open...** and select the folder:
-   ```
-   A:\AI_Project_work\money_tracking\android
-   ```
-3. Allow Gradle to sync dependencies (takes ~1 minute on first open).
+### Option 1: 1-Click Batch Execution (Fastest)
+Double-click [`run_app.bat`](file:///A:/AI_Project_work/money_tracking/run_app.bat) in the project root directory:
+```powershell
+A:\AI_Project_work\money_tracking\run_app.bat
+```
+This script automatically:
+1. Syncs `index.html` web dashboard assets to the Android app.
+2. Compiles the Android debug APK using Gradle.
+3. Installs the APK onto your connected simulator or Android device via `adb`.
+4. Grants SMS permissions (`READ_SMS`, `RECEIVE_SMS`) and launches `MainActivity`.
 
-### Step 2: Connect Your Android Phone
-1. On your phone, enable **Developer Options**:
-   - Go to **Settings -> About Phone -> Tap "Build Number" 7 times**.
-2. Go to **Settings -> Developer Options -> Enable "USB Debugging"**.
-3. Connect your phone to your PC via USB cable.
+---
 
-### Step 3: Run the App
-1. In Android Studio, select your phone from the device dropdown at the top.
-2. Click the green **Run (▶)** button.
-3. On your phone screen, tap **"Allow"** when prompted for SMS permissions.
-4. That's it! 
-   - All past banking SMS in your inbox will be scanned and plotted onto the bar graph.
-   - Any new payment or bank SMS will instantly update the Credit/Debit graph in real time!
+### Option 2: Android Studio Run (▶) Button
+1. Open **Android Studio** and click **File -> Open...** -> select `A:\AI_Project_work\money_tracking\android`.
+2. Select your connected phone or simulator from the top device dropdown.
+3. Click the green **Run (▶)** button (using the pre-configured `app` configuration in `.idea/runConfigurations/app.xml`).
 
 ---
 

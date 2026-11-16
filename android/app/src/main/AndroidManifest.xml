@@ -12,13 +12,17 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
 
+    <!-- Biometric & Fingerprint Security App Lock permissions (Normal permissions) -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="Aura Finance"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        android:theme="@style/Theme.AppCompat.NoActionBar">
 
         <!-- Main Dashboard Activity with local WebView -->
         <activity
@@ -41,6 +45,17 @@
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
+
+        <!-- File Provider for Offline CSV & JSON Data Export / Sharing -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.aura.finance.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 

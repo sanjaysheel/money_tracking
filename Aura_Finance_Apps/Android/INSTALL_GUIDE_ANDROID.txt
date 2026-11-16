@@ -1,0 +1,42 @@
+========================================================================
+AURA FINANCE - ANDROID INSTALLATION & PERMISSION GUIDE
+========================================================================
+
+File: Aura_Finance.apk (Production Release - Universal SMS Engine)
+
+Features in this Official Release:
+----------------------------------
+1. Universal SMS Automatic Inbox Scanner & Real-Time Listener:
+   - Supports ANY bank (HDFC, SBI, ICICI, Axis, Kotak, PNB, BOB, Canara, 
+     Union Bank, Federal Bank, Cooperative & Regional Rural Banks, Small Finance Banks).
+   - Supports ANY payment partner or aggregator (Razorpay, Cashfree, PayU, 
+     Pine Labs, Paytm PG, CCAvenue).
+   - Supports ANY e-commerce or startup platform (Swiggy, Zepto, Blinkit, 
+     Zomato, Uber, Ola, Amazon, Flipkart, etc.).
+   - Standard NPCI UPI formats (UPI/<rrn>/<Merchant>, UPI/P2M/..., UPI:Merchant:vpa:rrn).
+   - Smart Gateway VPA stripping (e.g. swiggy.payu@icici -> Swiggy).
+
+2. 100% Offline Privacy:
+   - Zero Internet Access (The app has no internet permission, so your financial data 
+     can NEVER leave your device).
+   - Local Encrypted SQLite database stored exclusively on your device.
+
+3. Biometrics & Security:
+   - 4-Digit Passcode PIN & Native Hardware Fingerprint / Biometrics.
+
+4. Offline Backup & Data Portability:
+   - 1-Click JSON & CSV Export / Restore in Settings.
+
+------------------------------------------------------------------------
+Installation Instructions:
+------------------------------------------------------------------------
+1. Copy "Aura_Finance.apk" to your phone via USB cable, Quick Share, or Google Drive.
+2. Open your phone's file manager and tap "Aura_Finance.apk".
+3. If prompted with "Install unknown apps", tap "Settings" -> toggle "Allow from this source".
+4. If Google Play Protect asks to verify or shows a prompt, tap "More details" -> "Install anyway".
+5. On first launch, Aura Finance displays the prominent SMS & Privacy Disclosure, then requests 
+   SMS permissions so it can automatically read your bank & merchant transactions.
+6. If Android 13+ restricts permissions, go to:
+   Phone Settings -> Apps -> Aura Finance -> 3 dots in top right -> "Allow restricted settings" -> 
+   then grant SMS permissions.
+========================================================================
