@@ -124,12 +124,17 @@ function setupBottomNav() {
 function switchSimulatorTab(tabName) {
   simState.activeTab = tabName;
 
-  // Update nav buttons
+  // Update phone nav dock buttons
   document.querySelectorAll('.sim-nav-btn').forEach(b => {
     b.classList.remove('active');
     if (b.getAttribute('data-tab') === tabName) {
       b.classList.add('active');
     }
+  });
+
+  // Synchronize companion remote buttons
+  document.querySelectorAll('.remote-tab-btn').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('data-tab') === tabName);
   });
 
   // Update tab screens
@@ -575,6 +580,15 @@ function setupModals() {
   document.querySelectorAll('.sim-modal-close').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.sim-modal-overlay').forEach(m => m.classList.remove('active'));
+    });
+  });
+
+  // Close when clicking outside modal content (backdrop click)
+  document.querySelectorAll('.sim-modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('active');
+      }
     });
   });
 

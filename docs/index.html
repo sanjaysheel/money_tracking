@@ -2025,7 +2025,7 @@ border: 1px solid rgba(99, 102, 241, 0.25);</code></pre>
         </div>
 
         <div class="workbench-code-content workbench-code-pane" id="code-pane-manifest">
-          <pre id="active-workbench-code"><span class="syn-comm">&lt;!-- 100% OFFLINE &amp; PRIVATE ARCHITECTURE:
+          <pre id="code-pre-manifest"><span class="syn-comm">&lt;!-- 100% OFFLINE &amp; PRIVATE ARCHITECTURE:
      Notice: "android.permission.INTERNET" is intentionally OMITTED.
      The Android OS physically prevents this app from making network sockets. --&gt;</span>
 <span class="syn-xml-tag">&lt;manifest</span> <span class="syn-xml-attr">xmlns:android</span>=<span class="syn-str">"http://schemas.android.com/apk/res/android"</span> <span class="syn-xml-attr">package</span>=<span class="syn-str">"com.aura.finance"</span><span class="syn-xml-tag">&gt;</span>
@@ -2050,7 +2050,7 @@ border: 1px solid rgba(99, 102, 241, 0.25);</code></pre>
         </div>
 
         <div class="workbench-code-content workbench-code-pane" id="code-pane-parser" style="display: none;">
-          <pre><span class="syn-kwd">package</span> com.aura.finance
+          <pre id="code-pre-parser"><span class="syn-kwd">package</span> com.aura.finance
 
 <span class="syn-kwd">object</span> <span class="syn-type">SmsParser</span> {
     <span class="syn-kwd">private val</span> <span class="syn-prop">CREDIT_KEYWORDS</span> = <span class="syn-func">listOf</span>(
@@ -2090,7 +2090,7 @@ border: 1px solid rgba(99, 102, 241, 0.25);</code></pre>
         </div>
 
         <div class="workbench-code-content workbench-code-pane" id="code-pane-db" style="display: none;">
-          <pre><span class="syn-kwd">package</span> com.aura.finance
+          <pre id="code-pre-db"><span class="syn-kwd">package</span> com.aura.finance
 
 <span class="syn-kwd">class</span> <span class="syn-type">TransactionDbHelper</span>(ctx: <span class="syn-type">Context</span>) : <span class="syn-type">SQLiteOpenHelper</span>(ctx, <span class="syn-str">"aura_finance.db"</span>, <span class="syn-kwd">null</span>, <span class="syn-num">4</span>) {
     <span class="syn-kwd">override fun</span> <span class="syn-func">onCreate</span>(db: <span class="syn-type">SQLiteDatabase</span>) {
@@ -2135,7 +2135,7 @@ border: 1px solid rgba(99, 102, 241, 0.25);</code></pre>
         </div>
 
         <div class="workbench-code-content workbench-code-pane" id="code-pane-bridge" style="display: none;">
-          <pre><span class="syn-kwd">package</span> com.aura.finance
+          <pre id="code-pre-bridge"><span class="syn-kwd">package</span> com.aura.finance
 
 <span class="syn-kwd">class</span> <span class="syn-type">WebAppInterface</span>(<span class="syn-kwd">private val</span> activity: <span class="syn-type">MainActivity</span>, <span class="syn-kwd">private val</span> db: <span class="syn-type">TransactionDbHelper</span>) {
 

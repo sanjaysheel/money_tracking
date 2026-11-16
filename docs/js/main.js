@@ -609,16 +609,30 @@ document.addEventListener('DOMContentLoaded', () => {
 function initWorkbenchTabs() {
   const tabs = document.querySelectorAll('.workbench-tab-btn');
   const panes = document.querySelectorAll('.workbench-code-pane');
+  const copyBtn = document.querySelector('.workbench-copy-btn');
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       const target = tab.getAttribute('data-target');
       tabs.forEach(t => t.classList.remove('active'));
-      panes.forEach(p => p.style.display = 'none');
+      panes.forEach(p => {
+        p.classList.remove('active');
+        p.style.display = 'none';
+      });
 
       tab.classList.add('active');
-      const activePane = document.getElementById(`code-pane-${target}`);
-      if (activePane) activePane.style.display = 'block';
+      const activePane = document.getElementById(`code-pane-${target}`) || document.getElementById(target);
+      if (activePane) {
+        activePane.classList.add('active');
+        activePane.style.display = 'block';
+        if (copyBtn) {
+          const pre = activePane.querySelector('pre');
+          if (pre && pre.id) {
+            copyBtn.setAttribute('data-copy-target', pre.id);
+          }
+        }
+      }
+      playTactileClick(1100, 0.02);
     });
   });
 }
@@ -637,12 +651,22 @@ function initCopyButtons() {
         textToCopy = btn.getAttribute('data-copy-text') || '';
       }
 
+      // Dynamic fallback for workbench active pane
+      if (!textToCopy && btn.classList.contains('workbench-copy-btn')) {
+        const activePane = document.querySelector('.workbench-code-pane.active') || document.querySelector('.workbench-code-pane[style*="display: block"]');
+        if (activePane) {
+          const pre = activePane.querySelector('pre');
+          if (pre) textToCopy = pre.innerText || pre.textContent;
+        }
+      }
+
       if (textToCopy && navigator.clipboard) {
         navigator.clipboard.writeText(textToCopy).then(() => {
           const originalText = btn.innerHTML;
           btn.innerHTML = '<span>✓ Copied</span>';
           btn.style.borderColor = '#10b981';
           btn.style.color = '#34d399';
+          playTactileClick(1400, 0.04);
           setTimeout(() => {
             btn.innerHTML = originalText;
             btn.style.borderColor = '';

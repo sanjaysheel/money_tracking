@@ -15,26 +15,116 @@
 
 .simulator-layout-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 400px;
-  gap: clamp(1.5rem, 3vw, 3rem);
-  align-items: start;
+  grid-template-columns: minmax(360px, 490px) minmax(340px, 395px);
+  justify-content: center;
+  align-items: center;
+  gap: clamp(1.75rem, 3.5vw, 3.5rem);
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
 }
 
-@media (max-width: 1080px) {
+/* Medium Laptops & Tablets Landscape (961px - 1100px) */
+@media (max-width: 1100px) and (min-width: 961px) {
+  .simulator-layout-grid {
+    grid-template-columns: minmax(320px, 440px) minmax(300px, 350px);
+    gap: 1.5rem;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+/* Laptop Viewport Height Optimization (<= 860px height on laptops like 1366x768, 1440x900) */
+@media (max-height: 860px) and (min-width: 961px) {
+  .phone-chassis {
+    height: clamp(540px, 73vh, 640px) !important;
+    max-width: 350px !important;
+    border-radius: 46px !important;
+    padding: 10px !important;
+  }
+  .phone-screen {
+    border-radius: 38px !important;
+  }
+  .sim-viewport {
+    padding: 10px 12px 16px !important;
+  }
+  .sim-hero-card {
+    padding: 13px 15px !important;
+  }
+  .sim-net-balance {
+    font-size: 23px !important;
+  }
+  .sim-remote-deck {
+    padding: 20px !important;
+    max-width: 450px !important;
+  }
+  .remote-header {
+    margin-bottom: 12px !important;
+  }
+  .remote-title {
+    font-size: 1.3rem !important;
+  }
+  .remote-desc {
+    font-size: 0.8125rem !important;
+    margin-top: 4px !important;
+  }
+  .remote-group {
+    margin-bottom: 12px !important;
+  }
+  .remote-btn {
+    padding: 7px 10px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* Tablets in Portrait & Devices <= 960px */
+@media (max-width: 960px) {
   .simulator-layout-grid {
     grid-template-columns: 1fr;
     justify-items: center;
-    gap: 2rem;
+    gap: 2.25rem;
   }
   .phone-chassis {
     order: 1;
     margin: 0 auto;
+    max-width: 360px;
+    height: clamp(550px, 72vh, 660px);
   }
   .sim-remote-deck {
     order: 2;
     width: 100%;
-    max-width: 580px;
+    max-width: 540px;
     margin: 0 auto;
+  }
+}
+
+/* Very Short Viewport Heights (<= 680px height) */
+@media (max-height: 680px) {
+  .phone-chassis {
+    height: clamp(470px, 68vh, 530px) !important;
+    max-width: 310px !important;
+    border-radius: 38px !important;
+    padding: 7px !important;
+  }
+  .phone-screen {
+    border-radius: 32px !important;
+  }
+  .phone-status-bar {
+    height: 36px !important;
+    padding: 0 14px !important;
+  }
+  .phone-bottom-nav {
+    height: 50px !important;
+  }
+  .sim-nav-btn {
+    padding: 3px 8px !important;
+    font-size: 8px !important;
+  }
+  .sim-hero-card {
+    padding: 10px !important;
+  }
+  .sim-net-balance {
+    font-size: 19px !important;
   }
 }
 
@@ -127,8 +217,8 @@
 /* ---- PHONE CHASSIS & BEZEL ---- */
 .phone-chassis {
   width: 100%;
-  max-width: 390px;
-  height: 780px;
+  max-width: 385px;
+  height: clamp(660px, 78vh, 760px);
   background: #090d16;
   border-radius: 54px;
   padding: 12px;
@@ -773,7 +863,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 30px 20px;
+  padding: 24px 16px;
+  overflow-y: auto;
   color: #fff;
   animation: lockFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -788,35 +879,39 @@
 }
 
 .sim-lock-icon {
-  width: 50px;
-  height: 50px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   background: rgba(99, 102, 241, 0.15);
   border: 1px solid rgba(99, 102, 241, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 20px;
   color: #818cf8;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
 }
 
 .sim-lock-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
+  text-align: center;
 }
 
 .sim-lock-subtitle {
   font-size: 11px;
   color: #94a3b8;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  text-align: center;
 }
 
 .sim-pin-dots {
   display: flex;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .sim-pin-dot {
@@ -837,18 +932,19 @@
 .sim-keypad-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  width: 220px;
-  margin-bottom: 18px;
+  gap: 10px;
+  width: 210px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
 }
 
 .sim-keypad-key {
-  height: 48px;
+  height: 44px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -875,6 +971,7 @@
   gap: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .sim-bio-trigger-btn:hover {
@@ -885,7 +982,7 @@
 .sim-modal-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.72);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   z-index: 90;
@@ -905,12 +1002,22 @@
 
 .sim-modal-content {
   width: 100%;
+  max-height: 88%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--sim-bg-body);
   border-top: 1px solid var(--sim-border);
   border-radius: 24px 24px 0 0;
-  padding: 18px 16px 24px;
+  padding: 16px 16px 22px;
   box-sizing: border-box;
   animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sim-modal-content::-webkit-scrollbar {
+  width: 3px;
+}
+.sim-modal-content::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.3);
 }
 
 @keyframes modalSlideUp {
@@ -966,11 +1073,14 @@
 
 /* ---- COMPANION CONTROL DECK (OUTSIDE PHONE) ---- */
 .sim-remote-deck {
+  width: 100%;
+  max-width: 490px;
   background: rgba(15, 23, 42, 0.7);
   border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: 24px;
-  padding: 26px;
+  padding: 24px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
 }
 
 .remote-header {
